@@ -1,0 +1,3 @@
+curl -u NetCoder99:??????? https://api.github.com/user/repos -d '{"name":"test","private":true}' 
+curl -u NetCoder99:??????? -X DELETE https://api.github.com/repos/NetCoder99/test
+curl -u NetCoder99:??????? https://api.github.com/user/repos
