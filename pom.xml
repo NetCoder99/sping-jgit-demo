@@ -4,8 +4,8 @@
 	<modelVersion>4.0.0</modelVersion>
 
     <groupId>com.john.home</groupId>
-    <artifactId>sping-jgit-demo</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <artifactId>spring-jgit-demo</artifactId>
+    <version>1.0.0</version>
     <name>sping-jgit-demo</name>
     <description>Demo project for Spring Boot</description>
 
