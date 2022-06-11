@@ -7,6 +7,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import com.example.demo.models.GitHubRepoProps;
+import com.example.demo.utilites.GitBatchCommands;
+import com.example.demo.utilites.GitHubApiCommands;
+
 @SpringBootApplication
 public class SpingJgitDemoApplication {
 	static Logger logger = LoggerFactory.getLogger(SpingJgitDemoApplication.class);
@@ -17,14 +21,14 @@ public class SpingJgitDemoApplication {
 			logger.info("SpingJgitDemoApplication started:{}");
 			SpringApplication.run(SpingJgitDemoApplication.class, args);
 
-			List<GitHubRepoProps> r1 = JGitCommands.getRepoNames(null);
-			logger.info("+++ {} repos found.", r1.size());
+			GitBatchCommands.ShowProcessEnv();
 			
-			int delStatus = JGitCommands.deleteRemoteRepo("test2");
-			logger.info("+++ {} delete status.", delStatus);
-
-			GitHubRepoProps newRepo = JGitCommands.createRemoteRepo("test2");
-			logger.info("+++ {} was created.", newRepo.getRepoName());
+//			List<GitHubRepoProps> r1 = GitHubApiCommands.getRepoNames(null);
+//			logger.info("+++ {} repos found.", r1.size());
+//			int delStatus = GitHubApiCommands.deleteRemoteRepo("test2");
+//			logger.info("+++ {} delete status.", delStatus);
+//			GitHubRepoProps newRepo = GitHubApiCommands.createRemoteRepo("test2");
+//			logger.info("+++ {} was created.", newRepo.getRepoName());
 			
 			
 			logger.info("SpingJgitDemoApplication finished");

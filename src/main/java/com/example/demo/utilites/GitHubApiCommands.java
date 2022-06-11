@@ -1,4 +1,4 @@
-package com.example.demo;
+package com.example.demo.utilites;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -19,12 +19,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
+import com.example.demo.SpingJgitDemoApplication;
+import com.example.demo.models.GitHubRepoProps;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
 @PropertySource("classpath:secrets.properties")
-public class JGitCommands {
+public class GitHubApiCommands {
 	static Logger logger = LoggerFactory.getLogger(SpingJgitDemoApplication.class);
 //	curl -u NetCoder99:?????? https://api.github.com/user/repos -d '{"name":"test","private":true}' 
 //	curl -u NetCoder99:?????? -X DELETE https://api.github.com/repos/NetCoder99/testfs
@@ -33,13 +35,13 @@ public class JGitCommands {
 	private static String TOKEN;
 	@Value( "${github.token}" )
     public void setToken(String token){
-    	JGitCommands.TOKEN = token;
+    	GitHubApiCommands.TOKEN = token;
     }
 	
     private static String USER;
     @Value("${github.user}")
     public void setUser(String user){
-    	JGitCommands.USER = user;
+    	GitHubApiCommands.USER = user;
     }
 
     private static final String baseUrl = "https://api.github.com";
