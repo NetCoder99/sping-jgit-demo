@@ -109,6 +109,12 @@ public class SpringJgitDemoApplication {
 	// check if local repo is tracking remote   
 	// --------------------------------------------------------------------------------------------------
 	private static void SetLocalToTrackRemote(GitHubRepoProps gitHubRepo) throws Exception {
+		List<String> remoteNames = GitBatchCommands.GetRemoteNames();
+		if (remoteNames.size() == 0) {
+			logger.info("++ Defining remote for: {}:{}", "origin", gitHubRepo.getHtmlUrl());
+			remoteNames = GitBatchCommands.AddRemote("origin", gitHubRepo.getHtmlUrl());
+		}
+		
 		List<String> remoteStatusList = GitBatchCommands.GetRemoteStatus();
 		for(String tmp : remoteStatusList) {
 			logger.info("++ {}", tmp);
