@@ -86,6 +86,7 @@ public class GitHubApiCommands {
 	// --------------------------------------------------------------------------------------------------
 	@SuppressWarnings("rawtypes")
 	public static GitHubRepoProps createRemoteRepo(String orgName, String repoName) throws Exception {
+		logger.info("++++ Creating remote repository: {}:{}:{}", baseUrl, orgName, repoName);
 		//curl -u NetCoder99:$TOKEN -X POST https://api.github.com/orgs/NetCoder99Org/repos -d '{"name":"test1","description":"This is your first repository"}'		
 		String rqstBody    = String.format("{\"name\":\"%s\" , \"private\":true , \"description\":\"Demo Repo create from code\"}", repoName);
 		String apiUrl      = baseUrl + "/orgs/" + orgName + "/repos";
@@ -108,30 +109,30 @@ public class GitHubApiCommands {
 		}
 	}
 
-	// --------------------------------------------------------------------------------------------------
-	@SuppressWarnings("rawtypes")
-	public static GitHubRepoProps createRemoteRepo(String repoName) throws Exception {
-		//    	curl -u NetCoder99:?????? https://api.github.com/user/repos -d '{"name":"test","private":true}' 
-		String userPass    = USER + ":" + TOKEN;
-		String basicAuth   = "Basic " + new String(Base64.getEncoder().encode(userPass.getBytes()));
-		String rqstBody    = String.format("{\"name\":\"%s\",\"private\":true}", repoName);
-		String apiUrl      = baseUrl + "/user/repos";
-		HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl))
-				.setHeader("Authorization", basicAuth)
-				.POST(BodyPublishers.ofString(rqstBody))
-				.build();
-		HttpResponse response = HttpClient.newHttpClient().send(request, BodyHandlers.ofString());
-		JsonNode jsonNode = objectMapper.readTree(response.body().toString());
-		JsonNode apiErr = jsonNode.get("errors");
-		if (apiErr != null) {
-			String apiMsg = jsonNode.get("message").textValue();
-			String errMsg = apiErr.get(0).get("message").textValue();
-			throw new Exception(String.format("%s : %s", apiMsg, errMsg));
-		}
-		else {
-			return extractRepoDetails(jsonNode);
-		}
-	}
+//	// --------------------------------------------------------------------------------------------------
+//	@SuppressWarnings("rawtypes")
+//	public static GitHubRepoProps createRemoteRepo(String repoName) throws Exception {
+//		//    	curl -u NetCoder99:?????? https://api.github.com/user/repos -d '{"name":"test","private":true}' 
+//		String userPass    = USER + ":" + TOKEN;
+//		String basicAuth   = "Basic " + new String(Base64.getEncoder().encode(userPass.getBytes()));
+//		String rqstBody    = String.format("{\"name\":\"%s\",\"private\":true}", repoName);
+//		String apiUrl      = baseUrl + "/user/repos";
+//		HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl))
+//				.setHeader("Authorization", basicAuth)
+//				.POST(BodyPublishers.ofString(rqstBody))
+//				.build();
+//		HttpResponse response = HttpClient.newHttpClient().send(request, BodyHandlers.ofString());
+//		JsonNode jsonNode = objectMapper.readTree(response.body().toString());
+//		JsonNode apiErr = jsonNode.get("errors");
+//		if (apiErr != null) {
+//			String apiMsg = jsonNode.get("message").textValue();
+//			String errMsg = apiErr.get(0).get("message").textValue();
+//			throw new Exception(String.format("%s : %s", apiMsg, errMsg));
+//		}
+//		else {
+//			return extractRepoDetails(jsonNode);
+//		}
+//	}
 
     // --------------------------------------------------------------------------------------------------
     @SuppressWarnings("rawtypes")
