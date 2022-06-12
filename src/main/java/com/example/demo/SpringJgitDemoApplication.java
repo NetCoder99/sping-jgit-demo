@@ -24,27 +24,33 @@ public class SpringJgitDemoApplication {
 		  LINUX
 		}
 	OSType osType = null;
+
+	private static String orgName   = "NetCoder99Org";
+	private static String repoName  = "test1";
 	
 	public static void main(String[] args) {
 		try {
 			logger.info("SpingJgitDemoApplication started:{}");
 			SpringApplication.run(SpringJgitDemoApplication.class, args);
 
-			logger.info(EnvUtilities.GetOS().toString());
-//			ProcessResponse response1 = ProcessBuilderNonBlocking.Execute(new String[] {"C:\\Users\\jdugger01\\bin\\areYouSure.bat"});
-//			ProcessResponse response2 = ProcessBuilderNonBlocking.Execute(new String[] {"git", "remote", "show", "origin"});
-//			ProcessResponse response3 = ProcessBuilderNonBlocking.Execute(new String[] {"git", "branch", "-a"});
-//			//ProcessResponse response4 = ProcessBuilderNonBlocking.Execute(new String[] {"xfsdgit", "branch", "-a"});
-//			ProcessResponse response5 = ProcessBuilderNonBlocking.Execute(new String[] {"git", "branch", "-ddda"});
-//			//GitBatchCommands.GetYesNo();
-			List<LocalRepoProps>  l1 = GitBatchCommands.GetBranches();
-			List<GitHubRepoProps> r1 = GitHubApiCommands.getRepoNames(null);
-//			logger.info("+++ {} repos found.", r1.size());
-//			int delStatus = GitHubApiCommands.deleteRemoteRepo("test2");
-//			logger.info("+++ {} delete status.", delStatus);
-//			GitHubRepoProps newRepo = GitHubApiCommands.createRemoteRepo("test2");
-//			logger.info("+++ {} was created.", newRepo.getRepoName());
+			// ------------------------------------------------------------------
+			// check for exit early 
+			// ------------------------------------------------------------------
 			
+			// ------------------------------------------------------------------
+			// check if remote exists, create if not found  
+			// ------------------------------------------------------------------
+			GitHubRepoProps gitHubRepo = CheckIfRemoteExists(orgName, repoName);
+			
+			// ------------------------------------------------------------------
+			// check if local repo is tracking remote   
+			// ------------------------------------------------------------------
+			SetLocalToTrackRemote(gitHubRepo);
+			
+			// ------------------------------------------------------------------
+			// finally push the updates to the remote   
+			// ------------------------------------------------------------------
+			PushBranches();
 			
 			logger.info("SpingJgitDemoApplication finished");
 		}
@@ -52,5 +58,88 @@ public class SpringJgitDemoApplication {
 			logger.error(ex.getLocalizedMessage(), ex);
 		}
 	}
+
+	
+	// --------------------------------------------------------------------------------------------------
+	// loop over the local branches and push the updates to GitHub 
+	// --------------------------------------------------------------------------------------------------
+	private static void PushBranches() throws Exception {
+		List<String> remoteStatus = GitBatchCommands.GetRemoteStatus();	
+		
+		List<LocalRepoProps> branchesList = GitBatchCommands.GetBranches();
+		for(LocalRepoProps branch : branchesList) {
+			logger.info(branch.toString());
+			if (CheckRemoteBranchStatus(branch.getName(), remoteStatus)) {
+				logger.info("Pushing updates for: {}", branch.getName());
+				GitBatchCommands.PushToRemote(branch.getName());
+			}
+		}
+	}
+	
+	
+	// --------------------------------------------------------------------------------------------------
+	// check if remote exists, create if not found on Github server 
+	// --------------------------------------------------------------------------------------------------
+	private static boolean CheckRemoteBranchStatus(String branchName, List<String> remoteStatus) throws Exception {
+		// if the branch does not have a 'remote status' entry it needs to be pushed
+		if (GetRemoteBranchStatus(branchName, remoteStatus).isEmpty()) {
+			return true;
+		}
+		
+		
+		return true;
+	}
+	
+	// --------------------------------------------------------------------------------------------------
+	// search the remote status string array for the selected branch 
+	// --------------------------------------------------------------------------------------------------
+	private static String GetRemoteBranchStatus(String branchName, List<String> remoteStatus) throws Exception {
+		for (String remoteLine : remoteStatus) {
+			if (remoteLine.contains(branchName)) {
+				logger.info("Branch found in remote status: {}", branchName);
+				return remoteLine;
+			}
+		}
+		return "";
+	}
+
+	
+	// --------------------------------------------------------------------------------------------------
+	// check if remote exists, create if not found on Github server 
+	// --------------------------------------------------------------------------------------------------
+	private static GitHubRepoProps CheckIfRemoteExists(String orgName, String repoName) throws Exception {
+		GitHubRepoProps gitHubRepo = GitHubApiCommands.getRemoteRepo(orgName, repoName);
+		if (gitHubRepo == null) {
+			gitHubRepo = GitHubApiCommands.createRemoteRepo(orgName, repoName);
+		}
+		return gitHubRepo;
+	}
+	
+	// --------------------------------------------------------------------------------------------------
+	// check if local repo is tracking remote   
+	// --------------------------------------------------------------------------------------------------
+	private static void SetLocalToTrackRemote(GitHubRepoProps gitHubRepo) throws Exception {
+		List<String> remoteStatusList = GitBatchCommands.GetRemoteStatus();
+		for(String tmp : remoteStatusList) {
+			logger.info("++ {} ++", tmp);
+		}
+	}
+
+//	// --------------------------------------------------------------------------------------------------
+//	// get and/or set the remote to 'origin'   
+//	// --------------------------------------------------------------------------------------------------
+//	private static String GetOriginUrl(GitHubRepoProps gitHubRepo) throws Exception {
+//		// always reset the origin / remote 
+//		if (GitBatchCommands.GetRemoteNames().size() != 0) {
+//			List<String> removeReponse = GitBatchCommands.RemoveRemote("origin");	
+//		}
+//		
+//		List<String> remoteNamesList = GitBatchCommands.AddRemote("origin", gitHubRepo.getHtmlUrl());
+//		logger.info("++ remoteNamesList.size: {} ++", remoteNamesList.size() );
+//		String[] remoteParts = remoteNamesList.get(0).trim().split("\t");
+//		return remoteParts[1].replace("(fetch)", "").replace("(push)", "").trim();
+//
+//	} 
+	
 
 }

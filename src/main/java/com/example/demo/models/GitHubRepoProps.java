@@ -8,13 +8,20 @@ public class GitHubRepoProps {
 	private int id;
 	private String repoId;
 	private String repoName;
+	private String htmlUrl;
+	private String apiUrl;
+	private String branchesUrl;
 	private LocalDateTime createDate;
 	private LocalDateTime updateDate;
 	private LocalDateTime pushDate;
 	
 	@Override
 	public String toString() {
-		return String.valueOf(id) + ":" + repoId +":" + repoName;
+		return String.valueOf(id) 
+			   + ":" + repoId 
+			   + ":" + repoName 
+			   + ":" + htmlUrl 
+			   ;
 	}
 
 	public GitHubRepoProps() {
@@ -73,4 +80,29 @@ public class GitHubRepoProps {
 		this.pushDate = pushDate;
 	}
 
+	public String getHtmlUrl() {
+		return htmlUrl;
+	}
+
+	public void setHtmlUrl(String htmlUrl) {
+		this.htmlUrl = htmlUrl;
+	}
+
+	public String getApiUrl() {
+		return apiUrl;
+	}
+
+	public void setApiUrl(String apiUrl) {
+		this.apiUrl = apiUrl;
+	}
+
+	public String getBranchesUrl() {
+		return branchesUrl;
+	}
+
+	public void setBranchesUrl(String branchesUrl) {
+		this.branchesUrl = branchesUrl;
+	}
+
+	
 }

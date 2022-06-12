@@ -28,50 +28,112 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @PropertySource("classpath:secrets.properties")
 public class GitHubApiCommands {
 	static Logger logger = LoggerFactory.getLogger(GitHubApiCommands.class);
-//	curl -u NetCoder99:?????? https://api.github.com/user/repos -d '{"name":"test","private":true}' 
-//	curl -u NetCoder99:?????? -X DELETE https://api.github.com/repos/NetCoder99/testfs
-//  curl -u NetCoder99:?????? https://api.github.com/user/repos
-	
+	//	curl -u NetCoder99:?????? https://api.github.com/user/repos -d '{"name":"test","private":true}' 
+	//	curl -u NetCoder99:?????? -X DELETE https://api.github.com/repos/NetCoder99/testfs
+	//  curl -u NetCoder99:?????? https://api.github.com/user/repos
+
 	private static String TOKEN;
 	@Value( "${github.token}" )
-    public void setToken(String token){
-    	GitHubApiCommands.TOKEN = token;
-    }
-	
-    private static String USER;
-    @Value("${github.user}")
-    public void setUser(String user){
-    	GitHubApiCommands.USER = user;
-    }
+	public void setToken(String token){
+		GitHubApiCommands.TOKEN = token;
+	}
 
-    private static final String baseUrl = "https://api.github.com";
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+	private static String USER;
+	@Value("${github.user}")
+	public void setUser(String user){
+		GitHubApiCommands.USER = user;
+	}
 
-    // --------------------------------------------------------------------------------------------------
-    @SuppressWarnings("rawtypes")
+	private static final String baseUrl = "https://api.github.com";
+	private static final ObjectMapper objectMapper = new ObjectMapper();
+
+	//curl -u NetCoder99:$TOKEN \
+	//     -H "Accept: application/vnd.github.v3+json" \
+	//     https://api.github.com/repos/NetCoder99Org/test1    
+	// --------------------------------------------------------------------------------------------------
+	@SuppressWarnings("rawtypes")
+	public static GitHubRepoProps getRemoteRepo(String orgName, String repoName) throws Exception {
+		// curl -u NetCoder99:?????? https://api.github.com/user/repos -d '{"name":"test","private":true}' 
+		String apiUrl      = baseUrl + "/repos/" + orgName + "/" + repoName;
+
+		HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl))
+				.setHeader("Authorization", getAuthToken())
+				.build();
+		
+		HttpResponse response = HttpClient.newHttpClient().send(request, BodyHandlers.ofString());
+		JsonNode jsonNode     = objectMapper.readTree(response.body().toString());
+		JsonNode apiErr       = jsonNode.get("errors");
+		if (apiErr != null) {
+			String apiMsg = jsonNode.get("message").textValue();
+			String errMsg = apiErr.get(0).get("message").textValue();
+			throw new Exception(String.format("%s : %s", apiMsg, errMsg));
+		}
+		else {
+			JsonNode repoId = jsonNode.get("id");
+			if (repoId != null) {
+				return extractRepoDetails(jsonNode);
+			}
+			else {
+				if (jsonNode.get("message") != null && jsonNode.get("message").textValue().toLowerCase().contains("not found")) {
+					return null;
+				}
+			}
+			String excpMsg = String.format("Unexpected repsonse from Github check for remote repository: %s.%s", orgName, repoName);
+			throw new Exception(excpMsg);
+		}
+	}
+
+
+	// --------------------------------------------------------------------------------------------------
+	@SuppressWarnings("rawtypes")
+	public static GitHubRepoProps createRemoteRepo(String orgName, String repoName) throws Exception {
+		//curl -u NetCoder99:$TOKEN -X POST https://api.github.com/orgs/NetCoder99Org/repos -d '{"name":"test1","description":"This is your first repository"}'		
+		String rqstBody    = String.format("{\"name\":\"%s\" , \"private\":true , \"description\":\"Demo Repo create from code\"}", repoName);
+		String apiUrl      = baseUrl + "/orgs/" + orgName + "/repos";
+
+		HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl))
+				.setHeader("Authorization", getAuthToken())
+				.POST(BodyPublishers.ofString(rqstBody))
+				.build();
+		
+		HttpResponse response = HttpClient.newHttpClient().send(request, BodyHandlers.ofString());
+		JsonNode jsonNode = objectMapper.readTree(response.body().toString());
+		JsonNode apiErr = jsonNode.get("errors");
+		if (apiErr != null) {
+			String apiMsg = jsonNode.get("message").textValue();
+			String errMsg = apiErr.get(0).get("message").textValue();
+			throw new Exception(String.format("%s : %s", apiMsg, errMsg));
+		}
+		else {
+			return extractRepoDetails(jsonNode);
+		}
+	}
+
+	// --------------------------------------------------------------------------------------------------
+	@SuppressWarnings("rawtypes")
 	public static GitHubRepoProps createRemoteRepo(String repoName) throws Exception {
-//    	curl -u NetCoder99:?????? https://api.github.com/user/repos -d '{"name":"test","private":true}' 
-    	String userPass    = USER + ":" + TOKEN;
-    	String basicAuth   = "Basic " + new String(Base64.getEncoder().encode(userPass.getBytes()));
-    	String rqstBody    = String.format("{\"name\":\"%s\",\"private\":true}", repoName);
-    	String apiUrl      = baseUrl + "/user/repos";
-    	HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl))
-                .setHeader("Authorization", basicAuth)
-                .POST(BodyPublishers.ofString(rqstBody))
-                .build();
-    	HttpResponse response = HttpClient.newHttpClient().send(request, BodyHandlers.ofString());
-        JsonNode jsonNode = objectMapper.readTree(response.body().toString());
-        JsonNode apiErr = jsonNode.get("errors");
-        if (apiErr != null) {
-            String apiMsg = jsonNode.get("message").textValue();
-            String errMsg = apiErr.get(0).get("message").textValue();
-          	throw new Exception(String.format("%s : %s", apiMsg, errMsg));
-        }
-        else {
-            return extractRepoDetails(jsonNode);
-        }
-    }
-    
+		//    	curl -u NetCoder99:?????? https://api.github.com/user/repos -d '{"name":"test","private":true}' 
+		String userPass    = USER + ":" + TOKEN;
+		String basicAuth   = "Basic " + new String(Base64.getEncoder().encode(userPass.getBytes()));
+		String rqstBody    = String.format("{\"name\":\"%s\",\"private\":true}", repoName);
+		String apiUrl      = baseUrl + "/user/repos";
+		HttpRequest request = HttpRequest.newBuilder().uri(URI.create(apiUrl))
+				.setHeader("Authorization", basicAuth)
+				.POST(BodyPublishers.ofString(rqstBody))
+				.build();
+		HttpResponse response = HttpClient.newHttpClient().send(request, BodyHandlers.ofString());
+		JsonNode jsonNode = objectMapper.readTree(response.body().toString());
+		JsonNode apiErr = jsonNode.get("errors");
+		if (apiErr != null) {
+			String apiMsg = jsonNode.get("message").textValue();
+			String errMsg = apiErr.get(0).get("message").textValue();
+			throw new Exception(String.format("%s : %s", apiMsg, errMsg));
+		}
+		else {
+			return extractRepoDetails(jsonNode);
+		}
+	}
+
     // --------------------------------------------------------------------------------------------------
     @SuppressWarnings("rawtypes")
 	public static int deleteRemoteRepo(String repoName) throws Exception {
@@ -120,7 +182,12 @@ public class GitHubApiCommands {
         tmpProps.setRepoName(jsonNode.get("name").textValue());	
         tmpProps.setCreateDate(cnvrtDateTime(jsonNode.get("created_at").textValue()));	
         tmpProps.setUpdateDate(cnvrtDateTime(jsonNode.get("updated_at").textValue()));	
-        tmpProps.setPushDate(cnvrtDateTime(jsonNode.get("pushed_at").textValue()));	
+        tmpProps.setPushDate(cnvrtDateTime(jsonNode.get("pushed_at").textValue()));
+        
+        tmpProps.setHtmlUrl(jsonNode.get("html_url").asText());
+        tmpProps.setApiUrl(jsonNode.get("url").asText());
+        tmpProps.setBranchesUrl(jsonNode.get("branches_url").asText());
+    	
         return tmpProps;
     }
     
@@ -130,5 +197,9 @@ public class GitHubApiCommands {
     	return LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
     }
     
+    // --------------------------------------------------------------------------------------------------
+    private static String getAuthToken() {
+		return "Basic " + new String(Base64.getEncoder().encode((USER + ":" + TOKEN).getBytes()));
+    }
 
 }
