@@ -16,7 +16,7 @@ public class ProcessBuilderNonBlocking {
 	// -------------------------------------------------------------------------------------------------
 	public static ProcessResponse Execute(String[] cmdArgs) throws Exception {
         try {
-        	logger.info("++++ ProcessBuilderNonBlocking.Execute Started ++++");
+        	//logger.info("++++ ProcessBuilderNonBlocking.Execute Started");
 			ProcessResponse response = new ProcessResponse();
 			response.setCmdArgs(cmdArgs);
 			response.setExecStartTime(LocalDateTime.now());
@@ -36,7 +36,7 @@ public class ProcessBuilderNonBlocking {
 
             // fetch the current output from the process
             String inpString = GetInputBufferString(inpStream);
-            logger.info("++++ inpString: \n" + inpString);
+            //logger.info("++++ inpString: \n" + inpString);
 
             // check if we might be stuck on a prompt
             if (process.isAlive()) {
@@ -57,7 +57,7 @@ public class ProcessBuilderNonBlocking {
             response.setErrResponse(GetInputBufferString(errStream));
 			response.setExecEndTime(LocalDateTime.now());
 
-			logger.info("++++ ProcessBuilderNonBlocking.Execute Finished ++++");
+			//logger.info("++++ ProcessBuilderNonBlocking.Execute Finished");
             return response;
         } catch (Exception e) {
         	throw e;

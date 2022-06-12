@@ -27,7 +27,8 @@ public class SpringJgitDemoApplication {
 	
 	public static void main(String[] args) {
 		try {
-			logger.info("SpingJgitDemoApplication started:{}");
+			logger.info("+ SpingJgitDemoApplication started:{}");
+			
 			SpringApplication.run(SpringJgitDemoApplication.class, args);
 
 			// ------------------------------------------------------------------
@@ -49,7 +50,7 @@ public class SpringJgitDemoApplication {
 			// ------------------------------------------------------------------
 			PushBranches();
 			
-			logger.info("SpingJgitDemoApplication finished");
+			logger.info("+ SpingJgitDemoApplication finished");
 		}
 		catch(Exception ex) {
 			logger.error(ex.getLocalizedMessage(), ex);
@@ -66,7 +67,7 @@ public class SpringJgitDemoApplication {
 		for(LocalRepoProps branch : branchesList) {
 			logger.info("++ Checking status of branch: {} ", branch.toString());
 			if (CheckRemoteBranchStatus(branch.getName(), remoteStatus)) {
-				logger.info("Pushing updates for: {}", branch.getName());
+				logger.info("++ Pushing updates for: {}", branch.getName());
 				GitBatchCommands.PushToRemote(branch.getName());
 			}
 		}
@@ -110,7 +111,7 @@ public class SpringJgitDemoApplication {
 	private static void SetLocalToTrackRemote(GitHubRepoProps gitHubRepo) throws Exception {
 		List<String> remoteStatusList = GitBatchCommands.GetRemoteStatus();
 		for(String tmp : remoteStatusList) {
-			logger.info("++ {} ++", tmp);
+			logger.info("++ {}", tmp);
 		}
 	}
 
