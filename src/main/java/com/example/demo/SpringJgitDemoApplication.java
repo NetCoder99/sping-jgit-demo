@@ -65,7 +65,7 @@ public class SpringJgitDemoApplication {
 		List<String>          remoteStatus = GitBatchCommands.GetRemoteStatus();	
 		List<LocalRepoProps>  branchesList = GitBatchCommands.GetBranches();
 		for(LocalRepoProps branch : branchesList) {
-			logger.info("++ Checking status of branch: {} ", branch.toString());
+			logger.info("++ Checking status of branch: {} ", branch.getName());
 			if (CheckRemoteBranchStatus(branch.getName(), remoteStatus)) {
 				logger.info("++ Pushing updates for: {}", branch.getName());
 				GitBatchCommands.PushToRemote(branch.getName());
@@ -84,6 +84,7 @@ public class SpringJgitDemoApplication {
 				if (remoteLine.contains("fast-forwardable")) {
 					return true;
 				}
+
 				if (remoteLine.contains("up to date")) {
 					return false;
 				}
